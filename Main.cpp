@@ -12,7 +12,7 @@
 using namespace std;
 
 
-bool StatDirectoryExists(LPCTSTR &szPath)
+bool StatDirectoryExists(const LPCTSTR &szPath)
 {
 	struct stat info;
 
@@ -24,7 +24,7 @@ bool StatDirectoryExists(LPCTSTR &szPath)
 	return false;
 }
 
-BOOL DirectoryExists(LPCTSTR szPath)
+BOOL DirectoryExists(const LPCTSTR &szPath)
 {
 	DWORD dwAttrib = GetFileAttributes(szPath);
 
@@ -32,12 +32,12 @@ BOOL DirectoryExists(LPCTSTR szPath)
 		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) && StatDirectoryExists(szPath);
 }
 
-bool FileExists(LPCTSTR szPath)
+bool FileExists(const LPCTSTR &szPath)
 {
 	return ::PathFileExists(szPath) == TRUE;
 }
 
-void LaunchFile(LPCTSTR szPath, LPCTSTR szDrive)
+void LaunchFile(const LPCTSTR &szPath, const LPCTSTR &szDrive)
 {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
@@ -45,16 +45,13 @@ void LaunchFile(LPCTSTR szPath, LPCTSTR szDrive)
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	if (!CreateProcessA(szPath, NULL, NULL, NULL, FALSE, NULL, NULL, szDrive, &si, &pi))
+	if (!CreateProcessA(szPath, NULL, NULL, NULL, FALSE, NULL, NULL, szDrive, &si, &pi)) { // Checking if we doesn't have permissions to start steam process
 		cout << "Failed to create loader process! Error " << GetLastError() << '\n';
+	}
 }
 
-void LaunchFileShell(LPCTSTR szPath)
-{
-	ShellExecute(NULL, "open", szPath, NULL, NULL, SW_SHOW);
-}
-
-vector<string> IterateFile(LPCTSTR szFname)
+// Returning us all string in file
+vector<string> IterateFile(const LPCTSTR &szFname)
 {
 	vector<string> strings;
 	fstream In(szFname);
@@ -71,7 +68,8 @@ vector<string> IterateFile(LPCTSTR szFname)
 	return strings;
 }
 
-vector<string> FindDirectoryFiles(LPCTSTR szPath)
+
+vector<string> FindDirectoryFiles(const LPCTSTR &szPath)
 {
 	vector<string> Strings;
 	WIN32_FIND_DATA FindFileData;
@@ -87,7 +85,7 @@ vector<string> FindDirectoryFiles(LPCTSTR szPath)
 	return Strings;
 }
 
-DWORD GetProcessByExeName(LPCTSTR ExeName)
+DWORD GetProcessByExeName(const LPCTSTR &ExeName)
 {
 	PROCESSENTRY32 pe32;
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -167,7 +165,7 @@ int main()
 	File.open(Settings);
 
 	CheckConfig(Settings, SteamPath, DrivePath, File);
-	
+
 	cout << "Put your flash drive in USB slot and press ENTER...";
 	cin.get();
 
